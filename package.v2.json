@@ -1,0 +1,15 @@
+{
+  "OpenListStrm": {
+    "name": "OpenList Strm生成",
+    "version": "1.1",
+    "level": 1,
+    "author": "lyndon",
+    "url": "https://github.com/LuSlate/MoviePilot-Plugins",
+    "description": "遍历 OpenList(alist) 存储为云盘媒体生成带签名直链的 .strm；支持整理事件与目录监听增量生成，供 Emby/Jellyfin 直连 CDN 播放。",
+    "icon": "https://cdn.oplist.org/gh/OpenListTeam/Logo@main/logo/logo.png",
+    "history": {
+      "v1.1": "增加整理完成事件监听、目录监听(watchdog)增量生成；scoped账号绝对路径前缀支持",
+      "v1.0": "初版：遍历OpenList生成签名直链strm，定时/立即全量"
+    }
+  }
+}
