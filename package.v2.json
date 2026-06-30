@@ -10,7 +10,7 @@
     "history": {
       "v1.1": "增加整理完成事件监听、目录监听(watchdog)增量生成；scoped账号绝对路径前缀支持",
       "v1.0": "初版：遍历OpenList生成签名直链strm，定时/立即全量",
-      "v2.0": "复刻 P123StrmHelper 全功能：FullSync/TransferMonitor/MediaInfoDownloader/刮削/媒体服务器刷新；分享与清理保留配置占位"
+      "v2.0": "复刻 P123StrmHelper 全功能：FullSync/TransferMonitor/MediaInfoDownloader/刮削/媒体服务器刷新；分享与清理保留配置占位 (修复整理监控反馈环：加存储过滤 monitor_storage)"
     }
   }
 }

@@ -432,6 +432,8 @@ class OpenListStrm(_PluginBase):
             self._user_download_mediaext = config.get("user_download_mediaext")
             self._transfer_monitor_enabled = config.get("transfer_monitor_enabled")
             self._transfer_monitor_paths = config.get("transfer_monitor_paths")
+            # 只处理落到该存储类型的整理事件，防止本地(如Strm硬链接)整理触发反馈环
+            self._monitor_storage = config.get("monitor_storage") or "alist"
             self._transfer_monitor_scrape_metadata_enabled = config.get(
                 "transfer_monitor_scrape_metadata_enabled"
             )
@@ -766,6 +768,17 @@ class OpenListStrm(_PluginBase):
         if not item_transfer or not getattr(item_transfer, "target_diritem", None):
             return
 
+        # 存储过滤：只处理落到 OpenList 存储的整理事件，
+        # 否则本地 Strm硬链接 等整理事件也会被匹配，形成反馈环生成错误直链
+        dest_storage = getattr(
+            getattr(item_transfer, "target_item", None), "storage", ""
+        ) or ""
+        if self._monitor_storage and dest_storage and dest_storage != self._monitor_storage:
+            logger.debug(
+                f"【监控整理STRM生成】存储 {dest_storage} 非目标 {self._monitor_storage}，跳过"
+            )
+            return
+
         # 网盘目的地目录（账号相对）
         itemdir_dest_path = self._account_rel(item_transfer.target_diritem.path)
         # 网盘目的地路径（包含文件名称，账号相对）
@@ -975,6 +988,7 @@ class OpenListStrm(_PluginBase):
                 "user_download_mediaext": self._user_download_mediaext,
                 "transfer_monitor_enabled": self._transfer_monitor_enabled,
                 "transfer_monitor_paths": self._transfer_monitor_paths,
+                "monitor_storage": self._monitor_storage,
                 "transfer_monitor_scrape_metadata_enabled": self._transfer_monitor_scrape_metadata_enabled,
                 "transfer_mp_mediaserver_paths": self._transfer_mp_mediaserver_paths,
                 "transfer_monitor_media_server_refresh_enabled": self._transfer_monitor_media_server_refresh_enabled,
@@ -1661,6 +1675,7 @@ class OpenListStrm(_PluginBase):
             "user_download_mediaext": "srt,ssa,ass,nfo,jpg,jpeg,png",
             "transfer_monitor_enabled": False,
             "transfer_monitor_paths": "",
+            "monitor_storage": "alist",
             "transfer_monitor_scrape_metadata_enabled": False,
             "transfer_mp_mediaserver_paths": "",
             "transfer_monitor_media_server_refresh_enabled": False,
