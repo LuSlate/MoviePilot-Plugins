@@ -45,6 +45,7 @@ class OpenListClient:
         self._user = user or ""
         self._password = password or ""
         self._token: Optional[str] = None
+        self._base_path: Optional[str] = None
         self._lock = threading.Lock()
 
     def _login(self) -> str:
@@ -61,6 +62,16 @@ class OpenListClient:
         if not token:
             raise RuntimeError("OpenList 登录失败: 未返回 token")
         self._token = token
+        # 顺手取账号 base_path（用于自动派生绝对路径前缀，无需手填）
+        try:
+            me = requests.get(
+                self._url + "/api/me", headers={"Authorization": token}, timeout=30
+            ).json()
+            bp = (me.get("data") or {}).get("base_path") or "/"
+            self._base_path = "" if bp == "/" else bp.rstrip("/")
+        except Exception as e:
+            logger.warn(f"【OpenList】获取账号 base_path 失败，前缀按空处理: {e}")
+            self._base_path = ""
         return token
 
     def token(self) -> str:
@@ -69,6 +80,12 @@ class OpenListClient:
                 if not self._token:
                     self._login()
         return self._token
+
+    def base_path(self) -> str:
+        """账号 base_path（账号被 scope 时即媒体根的绝对前缀，如 /123pan；未 scope 为空串）"""
+        if self._base_path is None:
+            self.token()  # 触发登录以填充 base_path
+        return self._base_path or ""
 
     def _post(self, api: str, payload: dict, _retry: bool = True) -> dict:
         resp = requests.post(
@@ -375,7 +392,7 @@ class OpenListStrm(_PluginBase):
     # 插件图标
     plugin_icon = "https://cdn.oplist.org/gh/OpenListTeam/Logo@main/logo/logo.png"
     # 插件版本
-    plugin_version = "2.0"
+    plugin_version = "2.1"
     # 插件作者
     plugin_author = "lyndon"
     # 作者主页
@@ -397,6 +414,7 @@ class OpenListStrm(_PluginBase):
     _ol_user = None
     _ol_pass = None
     _abs_prefix = None
+    _abs_prefix_cfg = ""
     _user_rmt_mediaext = None
     _user_download_mediaext = None
     _transfer_monitor_enabled = False
@@ -427,7 +445,9 @@ class OpenListStrm(_PluginBase):
             self._ol_url = (config.get("ol_url") or "").rstrip("/")
             self._ol_user = config.get("ol_user")
             self._ol_pass = config.get("ol_pass")
-            self._abs_prefix = (config.get("abs_prefix") or "/123pan").rstrip("/")
+            # 留空=自动派生(登录后取账号 base_path);填了=手动覆盖
+            self._abs_prefix_cfg = (config.get("abs_prefix") or "").rstrip("/")
+            self._abs_prefix = self._abs_prefix_cfg
             self._user_rmt_mediaext = config.get("user_rmt_mediaext")
             self._user_download_mediaext = config.get("user_download_mediaext")
             self._transfer_monitor_enabled = config.get("transfer_monitor_enabled")
@@ -466,8 +486,6 @@ class OpenListStrm(_PluginBase):
             self._clear_recyclebin_enabled = config.get("clear_recyclebin_enabled")
             self._clear_receive_path_enabled = config.get("clear_receive_path_enabled")
             self._cron_clear = config.get("cron_clear")
-            if not self._abs_prefix:
-                self._abs_prefix = "/123pan"
             if not self._user_rmt_mediaext:
                 self._user_rmt_mediaext = "mp4,mkv,ts,iso,rmvb,avi,mov,mpeg,mpg,wmv,3gp,asf,m4v,flv,m2ts,tp,f4v"
             if not self._user_download_mediaext:
@@ -485,6 +503,12 @@ class OpenListStrm(_PluginBase):
                 self._client = OpenListClient(
                     self._ol_url, self._ol_user, self._ol_pass
                 )
+                # abs_prefix 未手填时,自动用账号 base_path(scoped 账号即媒体根绝对前缀)
+                if not self._abs_prefix_cfg:
+                    self._abs_prefix = self._client.base_path()
+                    logger.info(
+                        f"OpenListStrm 自动派生绝对路径前缀: '{self._abs_prefix or '(空/未scope)'}'"
+                    )
         except Exception as e:
             logger.error(f"OpenList 客户端创建失败: {e}")
 
@@ -983,7 +1007,7 @@ class OpenListStrm(_PluginBase):
                 "ol_url": self._ol_url,
                 "ol_user": self._ol_user,
                 "ol_pass": self._ol_pass,
-                "abs_prefix": self._abs_prefix,
+                "abs_prefix": self._abs_prefix_cfg,
                 "user_rmt_mediaext": self._user_rmt_mediaext,
                 "user_download_mediaext": self._user_download_mediaext,
                 "transfer_monitor_enabled": self._transfer_monitor_enabled,
@@ -1503,7 +1527,7 @@ class OpenListStrm(_PluginBase):
                                                 "component": "VTextField",
                                                 "props": {
                                                     "model": "abs_prefix",
-                                                    "label": "绝对路径前缀(账号base)",
+                                                    "label": "绝对路径前缀(留空=自动取账号base)",
                                                     "placeholder": "/123pan",
                                                 },
                                             }
@@ -1670,7 +1694,7 @@ class OpenListStrm(_PluginBase):
             "ol_url": "http://192.168.5.17:5244",
             "ol_user": "moviepilot",
             "ol_pass": "",
-            "abs_prefix": "/123pan",
+            "abs_prefix": "",
             "user_rmt_mediaext": "mp4,mkv,ts,iso,rmvb,avi,mov,mpeg,mpg,wmv,3gp,asf,m4v,flv,m2ts,tp,f4v",
             "user_download_mediaext": "srt,ssa,ass,nfo,jpg,jpeg,png",
             "transfer_monitor_enabled": False,

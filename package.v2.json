@@ -1,7 +1,7 @@
 {
   "OpenListStrm": {
     "name": "OpenList Strm助手",
-    "version": "2.0",
+    "version": "2.1",
     "level": 1,
     "author": "lyndon",
     "url": "https://github.com/LuSlate/MoviePilot-Plugins",
@@ -10,7 +10,8 @@
     "history": {
       "v1.1": "增加整理完成事件监听、目录监听(watchdog)增量生成；scoped账号绝对路径前缀支持",
       "v1.0": "初版：遍历OpenList生成签名直链strm，定时/立即全量",
-      "v2.0": "复刻 P123StrmHelper 全功能：FullSync/TransferMonitor/MediaInfoDownloader/刮削/媒体服务器刷新；分享与清理保留配置占位 (修复整理监控反馈环：加存储过滤 monitor_storage)"
+      "v2.0": "复刻 P123StrmHelper 全功能：FullSync/TransferMonitor/MediaInfoDownloader/刮削/媒体服务器刷新；分享与清理保留配置占位 (修复整理监控反馈环：加存储过滤 monitor_storage)",
+      "v2.1": "abs_prefix 自动派生(取账号 base_path,无需手填)"
     }
   }
 }
