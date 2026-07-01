@@ -13,5 +13,16 @@
       "v2.0": "复刻 P123StrmHelper 全功能：FullSync/TransferMonitor/MediaInfoDownloader/刮削/媒体服务器刷新；分享与清理保留配置占位 (修复整理监控反馈环：加存储过滤 monitor_storage)",
       "v2.1": "abs_prefix 自动派生(取账号 base_path,无需手填)"
     }
+  },
+  "AutoSubtitle": {
+    "name": "自动字幕下载",
+    "version": "2.0",
+    "level": 1,
+    "author": "lyndon",
+    "url": "https://github.com/LuSlate/MoviePilot-Plugins",
+    "description": "整理完成后自动搜索并下载缺失的中文字幕。支持手动扫描、云端字幕拉取、MP内置搜索+外部API(射手网/OpenSubtitles)、中英文混合关键词、代理。",
+    "history": {
+      "v2.0": "重写：手动扫描+自动双模式；三层检测(sidecar/ffprobe/云端)；jieba中文分词+YAKE英文；assrt.net/opensubtitles外部源；SOCKS5/HTTP代理；简中优先无则繁中fallback"
+    }
   }
 }

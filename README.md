@@ -1,12 +1,25 @@
 # MoviePilot-Plugins
 
-自用 MoviePilot v2 插件仓库。
+MoviePilot v2 插件集合。
 
-## OpenList Strm生成 (OpenListStrm)
+## 插件列表
 
-遍历 OpenList(alist) 存储，为云盘媒体在媒体库生成带签名直链的 `.strm`，供 Emby/Jellyfin 直连 CDN 播放。
+### OpenListStrm
 
-- 定时 / 立即全量生成（可迁移旧 strm）
-- 整理完成事件（TransferComplete）增量生成
-- 本地目录监听（watchdog）增量生成
-- 适配 OpenList scoped 账号（绝对路径前缀 + 相对遍历根）
+OpenList(alist) STRM 一条龙助手。[[详情](plugins.v2/openliststrm)]
+
+### AutoSubtitle v2.0
+
+自动字幕下载插件，文件整理完成后自动搜索并下载缺失的中文字幕。
+
+**功能：**
+- 手动扫描 + TransferComplete 自动触发，双模式
+- 三层字幕检测：本地 sidecar → ffprobe 内封 → 云端拉取
+- MP SearchChain + 外部 API (assrt.net / opensubtitles) 双路搜索
+- jieba 中英文混合关键词
+- SOCKS5/HTTP 代理支持
+- 简中优先，无简中 fallback 繁体
+
+**配置：** 代理建议填 `socks5://192.168.5.14:7890`
+
+**安装：** MP 插件市场搜索 "自动字幕下载" 安装。
